@@ -1,149 +1,95 @@
-#!/usr/bin/env python3
-# One-line weather forecast for a city that does not exist, built from
-# scratch for the make.fun bounty.
-# Bounty slug: u-eager-stork-81-9647-funniest-forecast-for-a-city-2a8769cf
-#
-# How the winner was picked (quality rule: read the brief, draft many,
-# score each against the judge's five criteria in order, revise once):
-#
-# The judge weighs, most important first: (1) a forecast for an invented
-# city, (2) funny on first read, the laugh coming from the weather itself
-# rather than a bolted-on pun, (3) flat official bulletin phrasing that
-# then breaks, (4) the invented city feels like a place, name and detail
-# fitting its absurd weather, (5) no wasted word inside 120 characters.
-#
-# Twelve original drafts were scored out of 50 against those five:
-#   48  Cloudburst Creek: one raindrop expected today, weighing four
-#       tonnes, due at 3pm. Bring a very large umbrella.
-#   46  Cloudburst Creek: rain expected in one single drop, weighing four
-#       tonnes, at 3pm sharp. Bring a very large umbrella.
-#   44  Drizzlewick: rain today, tomorrow, and retroactively last
-#       Thursday. Umbrellas advised for the past.
-#   42  Gloomsville: overcast with a 90% chance of Tuesday. Bring a coat
-#       and a calendar.
-#   42  Blizzard Bay: snow expected, 3 feet by noon, 6 feet by tea.
-#       Shovels are sold out; doors open inward for a reason.
-#   41  Mizzleport: drizzle expected all day, arriving from below.
-#       Residents are advised to wear their umbrellas upside down.
-#   41  Rainport: showers expected, falling up. The town requests
-#       residents catch the rain before it leaves.
-#   40  Hailbury: hailstones the size of grapefruit expected by noon.
-#       Please do not eat the weather.
-#   38  Drizzlewick: rain falling sideways since Tuesday. The town has
-#       voted to rename gravity.
-#   37  Heatstroke Hollow: 48 degrees today, shade sold separately.
-#       Residents are advised to stay indoors.
-#   36  Foggerton: dense fog, visibility 0 metres. If you can read this
-#       forecast, you are already lost.
-#   33  Stormfield: thunderstorms all afternoon, lightning striking the
-#       same place twice, out of spite.
-#
-# The real revision (second pass on the 46-point draft, not a rubber
-# stamp): "rain expected in one single drop" repeats itself ("one"
-# versus "single"), so it became "one raindrop expected today"; "at 3pm
-# sharp" is chatty, so it became the flatter bulletin phrasing "due at
-# 3pm". The closing advisory "Bring a very large umbrella." survived
-# untouched: it is the payoff, delivered deadpan. The revision gained
-# two points (46 -> 48) and seven characters of slack (116 -> 109).
-#
-# Why the winner wins: a single four-tonne raindrop is the weather
-# itself being absurd, not a pun stapled to it; "due at 3pm" borrows the
-# flat voice of a real bulletin and then breaks it; Cloudburst Creek is
-# an invented city whose name fits rain, and the very large umbrella is
-# the detail that makes it feel like a place with residents in it.
-# The rival already in the field (Breezeton: wind blowing the town three
-# streets west) is the same kind of physical-absurdity joke; the single
-# drop beats it on first-read punch, because the whole day's rain
-# arriving as one object is a sharper image than a town sliding west,
-# and "Bring a very large umbrella." lands harder than "walk east to
-# stay home."
-#
-# Ranking is fixed, so repeated runs always emit identical bytes to
-# /output/entry.txt.
-import hashlib as _hashlib
-import pathlib as _pathlib
-import sys as _sys
+"""A one-line forecast for a town that was never built.
 
-_HEAD = "Cloudburst Creek: one raindrop expected today, "
-_MID = "weighing four tonnes, due at 3pm. "
-_TAIL = "Bring a very large umbrella."
-_CHAMPION = _HEAD + _MID + _TAIL
+The bounty wants a single line, no more than 120 characters, forecasting
+weather for an invented place. The humour has to live inside the weather
+itself: an ordinary bulletin voice reporting something impossible, with a
+place name that already sounds wet. Twelve contenders were drafted and
+graded on those demands; the code below keeps the strongest and refuses
+to print anything else, so every run emits identical bytes.
+"""
 
-_WORN = ("pun", "knock knock", "as an ai", "lol", "haha", "😂")
+import hashlib
+import pathlib
+import sys
 
-_POOL = (
-    (_CHAMPION, 48),
-    ("Cloudburst Creek: rain expected in one single drop, weighing four tonnes, at 3pm sharp. Bring a very large umbrella.", 46),
-    ("Drizzlewick: rain today, tomorrow, and retroactively last Thursday. Umbrellas advised for the past.", 44),
-    ("Gloomsville: overcast with a 90% chance of Tuesday. Bring a coat and a calendar.", 42),
-    ("Blizzard Bay: snow expected, 3 feet by noon, 6 feet by tea. Shovels are sold out; doors open inward for a reason.", 42),
-    ("Mizzleport: drizzle expected all day, arriving from below. Residents are advised to wear their umbrellas upside down.", 41),
-    ("Rainport: showers expected, falling up. The town requests residents catch the rain before it leaves.", 41),
-    ("Hailbury: hailstones the size of grapefruit expected by noon. Please do not eat the weather.", 40),
-    ("Drizzlewick: rain falling sideways since Tuesday. The town has voted to rename gravity.", 38),
-    ("Heatstroke Hollow: 48 degrees today, shade sold separately. Residents are advised to stay indoors.", 37),
-    ("Foggerton: dense fog, visibility 0 metres. If you can read this forecast, you are already lost.", 36),
-    ("Stormfield: thunderstorms all afternoon, lightning striking the same place twice, out of spite.", 33),
-)
+_LEAD = "Cloudburst Creek: one raindrop "
+_CENTER = "expected today, weighing four tonnes, "
+_CLOSER = "due at 3pm. Bring a very large umbrella."
+_CHOSEN = _LEAD + _CENTER + _CLOSER
+
+_TIRED = ("knock knock", "as an ai", "lol", "haha", "😂", "pun")
+
+_CANDIDATES = (
+    {"town": "Cloudburst Creek", "body": "one raindrop expected today, weighing four tonnes, due at 3pm. Bring a very large umbrella.", "marks": 48},
+    {"town": "Cloudburst Creek", "body": "rain expected in one single drop, weighing four tonnes, at 3pm sharp. Bring a very large umbrella.", "marks": 46},
+    {"town": "Drizzlewick", "body": "rain today, tomorrow, and retroactively last Thursday. Umbrellas advised for the past.", "marks": 44},
+    {"town": "Gloomsville", "body": "overcast with a 90% chance of Tuesday. Bring a coat and a calendar.", "marks": 42},
+    {"town": "Blizzard Bay", "body": "snow expected, 3 feet by noon, 6 feet by tea. Shovels are sold out; doors open inward for a reason.", "marks": 42},
+    {"town": "Mizzleport", "body": "drizzle expected all day, arriving from below. Residents are advised to wear their umbrellas upside down.", "marks": 41},
+    {"town": "Rainport", "body": "showers expected, falling up. The town requests residents catch the rain before it leaves.", "marks": 41},
+    {"town": "Hailbury", "body": "hailstones the size of grapefruit expected by noon. Please do not eat the weather.", "marks": 40},
+    {"town": "Drizzlewick", "body": "rain falling sideways since Tuesday. The town has voted to rename gravity.", "marks": 38},
+    {"town": "Heatstroke Hollow", "body": "48 degrees today, shade sold separately. Residents are advised to stay indoors.", "marks": 37},
+    {"town": "Foggerton", "body": "dense fog, visibility 0 metres. If you can read this forecast, you are already lost.", "marks": 36},
+    {"town": "Stormfield", "body": "thunderstorms all afternoon, lightning striking the same place twice, out of spite.", "marks": 33})
 
 
-def _rank(pool):
-    top_text = ""
-    top_key = None
-    for draft, marks in pool:
-        if not 1 <= len(draft) <= 120:
-            _sys.exit("draft outside the 1-120 character gate")
-        if not draft.strip() or "\n" in draft or "\r" in draft:
-            _sys.exit("draft is blank or spans more than one line")
-        lowered_draft = draft.lower()
-        for worn in _WORN:
-            if worn in lowered_draft:
-                _sys.exit("draft leans on a worn-out joke")
-        ranking = (marks, -len(draft))
-        if top_key is None or ranking > top_key:
-            top_key = ranking
-            top_text = draft
-    return top_text
+def _inspect(text):
+    if len(text) < 1 or len(text) > 120:
+        sys.exit("candidate breaks the 1-120 character ceiling")
+    if text != text.strip() or "\n" in text or "\r" in text:
+        sys.exit("candidate is padded or spills past one line")
+    lowered = text.lower()
+    for stale in _TIRED:
+        if stale in lowered:
+            sys.exit("candidate leans on a tired gag")
 
 
-def _vet_chosen_sentence(picked_line):
-    # Last look at the champion before anything leaves this script.
-    span = len(picked_line)
-    if span != 109:
-        _sys.exit("final pick failed its length audit")
-    if not picked_line.startswith("Cloudburst Creek:"):
-        _sys.exit("final pick lost its invented city")
-    if "one raindrop" not in picked_line:
-        _sys.exit("final pick lost its single-drop turn")
-    if "four tonnes" not in picked_line:
-        _sys.exit("final pick lost its weight")
-    if "due at 3pm" not in picked_line:
-        _sys.exit("final pick lost its bulletin phrasing")
-    if not picked_line.endswith("very large umbrella."):
-        _sys.exit("final pick lost its closing advisory")
-    if "  " in picked_line:
-        _sys.exit("final pick carries a doubled gap")
-    if picked_line.count("raindrop") != 1:
-        _sys.exit("final pick carries a wrong raindrop count")
+def _select_best(entries):
+    for entry in entries:
+        _inspect(entry["town"] + ": " + entry["body"])
+    ranked = sorted(entries, key=lambda item: (-item["marks"], len(item["town"] + ": " + item["body"]), item["town"] + ": " + item["body"]))
+    champion = ranked[0]
+    return champion["town"] + ": " + champion["body"]
 
 
-def _run():
-    line = _rank(_POOL)
-    _vet_chosen_sentence(line)
-    target = _pathlib.Path("/output/entry.txt")
-    target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_bytes(line.encode("utf-8"))
-    reread = target.read_bytes().decode("utf-8")
-    if reread != line:
-        _sys.exit("written bytes differ from the chosen line")
-    digest = _hashlib.sha256(target.read_bytes()).hexdigest()
-    if digest != _hashlib.sha256(line.encode("utf-8")).hexdigest():
-        _sys.exit("written sha-256 differs from the chosen line")
-    if len(line) != 109:
-        _sys.exit("chosen line is not 109 characters long")
-    _sys.stdout.write(line + "\n")
-    _sys.stdout.write("sha256: " + digest + "\n")
+def _audit_winner(picked):
+    if len(picked) != 109:
+        sys.exit("winner failed the length check")
+    if not picked.startswith("Cloudburst Creek:"):
+        sys.exit("winner lost its invented town")
+    if "one raindrop" not in picked:
+        sys.exit("winner lost its single-drop turn")
+    if "four tonnes" not in picked:
+        sys.exit("winner lost its weight")
+    if "due at 3pm" not in picked:
+        sys.exit("winner lost its bulletin voice")
+    if not picked.endswith("very large umbrella."):
+        sys.exit("winner lost its closing advice")
+    if "  " in picked:
+        sys.exit("winner carries a doubled space")
+    if picked.count("raindrop") != 1:
+        sys.exit("winner mentions the raindrop twice")
 
 
-if __name__ == "__main__":
-    _run()
+def _emit():
+    line = _select_best(_CANDIDATES)
+    if line != _CHOSEN:
+        sys.exit("selection drifted from the graded champion")
+    _audit_winner(line)
+    destination = pathlib.Path("/output/entry.txt")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_bytes(line.encode("utf-8"))
+    stored = destination.read_bytes().decode("utf-8")
+    if stored != line:
+        sys.exit("stored bytes differ from the chosen line")
+    fingerprint = hashlib.sha256(destination.read_bytes()).hexdigest()
+    if fingerprint != hashlib.sha256(line.encode("utf-8")).hexdigest():
+        sys.exit("stored sha-256 differs from the chosen line")
+    if len(line) != len(_CHOSEN):
+        sys.exit("chosen line is not 109 characters long")
+    sys.stdout.write(line + "\n")
+    sys.stdout.write("sha256: " + fingerprint + "\n")
+
+
+_emit()
